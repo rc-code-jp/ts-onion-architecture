@@ -1,6 +1,5 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { NotFoundError } from '@/domain/errors/NotFoundError';
-import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
 
 export class UpdateTaskGroupSort {
   constructor(private repository: ITaskGroupRepository) {}
@@ -19,7 +18,7 @@ export class UpdateTaskGroupSort {
       throw new NotFoundError('TaskGroup not found');
     }
 
-    let prevSort: number | null = null;
+    let prev = null;
     if (params.prevId) {
       const prevModel = await this.repository.findOne({
         id: params.prevId,
@@ -28,10 +27,10 @@ export class UpdateTaskGroupSort {
       if (!prevModel) {
         throw new NotFoundError('TaskGroup not found');
       }
-      prevSort = prevModel.sort;
+      prev = prevModel.sort;
     }
 
-    let nextSort: number | null = null;
+    let next = null;
     if (params.nextId) {
       const nextModel = await this.repository.findOne({
         id: params.nextId,
@@ -40,12 +39,10 @@ export class UpdateTaskGroupSort {
       if (!nextModel) {
         throw new NotFoundError('TaskGroup not found');
       }
-      nextSort = nextModel.sort;
+      next = nextModel.sort;
     }
 
-    const updated = model.withUpdates({
-      sort: TaskGroupModel.sortBetween(prevSort, nextSort),
-    });
+    const updated = model.reorderBetween(prev, next);
 
     return await this.repository.save({ item: updated });
   }

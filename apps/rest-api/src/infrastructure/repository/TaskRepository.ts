@@ -1,5 +1,6 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
 import { TaskModel } from '@/domain/models/TaskModel';
+import { Sort } from '@/domain/values/Sort';
 import { Prisma } from '@prisma/client';
 
 export class TaskRepository implements ITaskRepository {
@@ -19,7 +20,7 @@ export class TaskRepository implements ITaskRepository {
       dueDate: item.dueDate ?? undefined,
       dueTime: item.dueTime ?? undefined,
       done: item.done,
-      sort: item.sort,
+      sort: Sort.of(item.sort),
     });
     return model;
   }
@@ -39,7 +40,7 @@ export class TaskRepository implements ITaskRepository {
           dueDate: item.dueDate ?? undefined,
           dueTime: item.dueTime ?? undefined,
           done: item.done,
-          sort: item.sort,
+          sort: Sort.of(item.sort),
         }),
     );
   }
@@ -67,7 +68,7 @@ export class TaskRepository implements ITaskRepository {
           dueDate: item.dueDate,
           dueTime: item.dueTime,
           done: item.done,
-          sort: item.sort,
+          sort: item.sort.value,
         },
       });
       return item;
@@ -82,7 +83,7 @@ export class TaskRepository implements ITaskRepository {
         dueDate: item.dueDate,
         dueTime: item.dueTime,
         done: item.done,
-        sort: item.sort,
+        sort: item.sort.value,
       },
     });
     const newItem = new TaskModel({
@@ -93,7 +94,7 @@ export class TaskRepository implements ITaskRepository {
       dueDate: res.dueDate ?? undefined,
       dueTime: res.dueTime ?? undefined,
       done: res.done,
-      sort: res.sort,
+      sort: Sort.of(res.sort),
     });
     return newItem;
   }

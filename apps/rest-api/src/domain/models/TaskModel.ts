@@ -1,15 +1,14 @@
+import { Sort } from '@/domain/values/Sort';
 import { BaseModel } from './BaseModel';
 
 export class TaskModel extends BaseModel {
   readonly taskGroupId: number;
   readonly title: string;
-  readonly done?: boolean;
+  readonly done: boolean;
   readonly description?: string;
   readonly dueDate?: string;
   readonly dueTime?: string;
-  readonly sort: number;
-
-  static readonly INITIAL_SORT_VALUE = 65535;
+  readonly sort: Sort;
 
   constructor(props: {
     id: number;
@@ -19,12 +18,12 @@ export class TaskModel extends BaseModel {
     description?: string;
     dueDate?: string;
     dueTime?: string;
-    sort: number;
+    sort: Sort;
   }) {
     super({ id: props.id });
     this.taskGroupId = props.taskGroupId;
     this.title = props.title;
-    this.done = props.done;
+    this.done = props.done ?? false;
     this.description = props.description;
     this.dueDate = props.dueDate;
     this.dueTime = props.dueTime;
@@ -37,7 +36,7 @@ export class TaskModel extends BaseModel {
     description?: string;
     dueDate?: string;
     dueTime?: string;
-    maxSort: number;
+    afterMaxSort: number;
   }): TaskModel {
     return new TaskModel({
       id: 0,
@@ -46,24 +45,16 @@ export class TaskModel extends BaseModel {
       description: props.description,
       dueDate: props.dueDate,
       dueTime: props.dueTime,
-      sort: Math.floor(props.maxSort) + TaskModel.INITIAL_SORT_VALUE,
+      sort: Sort.appendAfter(props.afterMaxSort),
     });
   }
 
-  static sortBetween(prev: number | null, next: number | null): number {
-    const prevSort = prev ?? 0;
-    const nextSort = next ?? TaskModel.INITIAL_SORT_VALUE;
-    return (prevSort + nextSort) / 2;
-  }
-
-  withUpdates(
+  changeContent(
     updates: Partial<{
       title: string;
       description: string;
       dueDate: string;
       dueTime: string;
-      done: boolean;
-      sort: number;
     }>,
   ): TaskModel {
     return new TaskModel({
@@ -73,8 +64,35 @@ export class TaskModel extends BaseModel {
       description: updates.description ?? this.description,
       dueDate: updates.dueDate ?? this.dueDate,
       dueTime: updates.dueTime ?? this.dueTime,
-      done: updates.done ?? this.done,
-      sort: updates.sort ?? this.sort,
+      done: this.done,
+      sort: this.sort,
+    });
+  }
+
+  markDone(done: boolean): TaskModel {
+    if (this.done === done) return this;
+    return new TaskModel({
+      id: this.id,
+      taskGroupId: this.taskGroupId,
+      title: this.title,
+      description: this.description,
+      dueDate: this.dueDate,
+      dueTime: this.dueTime,
+      done,
+      sort: this.sort,
+    });
+  }
+
+  reorderBetween(prev: Sort | null, next: Sort | null): TaskModel {
+    return new TaskModel({
+      id: this.id,
+      taskGroupId: this.taskGroupId,
+      title: this.title,
+      description: this.description,
+      dueDate: this.dueDate,
+      dueTime: this.dueTime,
+      done: this.done,
+      sort: Sort.between(prev, next),
     });
   }
 }
