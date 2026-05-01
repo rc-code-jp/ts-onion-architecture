@@ -99,4 +99,14 @@ export class TaskRepository implements ITaskRepository {
 
     return res.count;
   }
+
+  async deleteByTaskGroupId(params: { taskGroupId: number }): Promise<number> {
+    const res = await this.db.task.deleteMany({
+      where: {
+        taskGroupId: params.taskGroupId,
+      },
+    });
+
+    return res.count;
+  }
 }

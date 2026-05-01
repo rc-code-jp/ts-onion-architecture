@@ -13,6 +13,8 @@ export class DeleteTaskGroup {
       if (!model) {
         throw new NotFoundError('TaskGroup not found');
       }
+      // 外部キー制約のため、先に配下の Task を削除する
+      await repos.taskRepository.deleteByTaskGroupId({ taskGroupId: model.id });
       return repos.taskGroupRepository.delete({ item: model });
     });
   }
