@@ -1,14 +1,16 @@
 import { IRefreshTokenRepository } from '@/application/repositories/IRefreshTokenRepository';
 import { RefreshTokenModel } from '@/domain/models/RefreshTokenModel';
-import { db } from '@/infrastructure/database/db';
+import { PrismaClient } from '@prisma/client';
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
+  constructor(private db: PrismaClient) {}
+
   async create(params: {
     uuid: string;
     hashedToken: string;
     userId: number;
   }): Promise<RefreshTokenModel> {
-    const item = await db.refreshToken.create({
+    const item = await this.db.refreshToken.create({
       data: {
         uuid: params.uuid,
         hashedToken: params.hashedToken,
@@ -25,7 +27,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async findByUuid(params: { uuid: string }): Promise<RefreshTokenModel | null> {
-    const item = await db.refreshToken.findFirst({
+    const item = await this.db.refreshToken.findFirst({
       where: { uuid: params.uuid },
     });
     if (!item) return null;
@@ -41,7 +43,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async delete(params: { uuid: string }): Promise<RefreshTokenModel | null> {
-    const item = await db.refreshToken.update({
+    const item = await this.db.refreshToken.update({
       where: { uuid: params.uuid },
       data: {
         revoked: true,
@@ -60,7 +62,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async revokeMany(params: { userId: number }): Promise<number> {
-    const res = await db.refreshToken.updateMany({
+    const res = await this.db.refreshToken.updateMany({
       where: { userId: params.userId },
       data: {
         revoked: true,

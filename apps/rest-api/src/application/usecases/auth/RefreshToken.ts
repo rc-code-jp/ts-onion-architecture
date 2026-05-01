@@ -1,17 +1,18 @@
 import { IRefreshTokenRepository } from '@/application/repositories/IRefreshTokenRepository';
 import { IUserRepository } from '@/application/repositories/IUserRepository';
-import { generateTokens, verifyRefreshToken } from '@/utils/auth/jtw';
-import { hashToken } from '@/utils/auth/token';
-import { generateUUID } from '@/utils/auth/uuid';
+import { ITokenService } from '@/application/services/ITokenService';
+import { IUuidGenerator } from '@/application/services/IUuidGenerator';
 
 export class RefreshToken {
   constructor(
     private repository: IUserRepository,
     private refreshTokenRepository: IRefreshTokenRepository,
+    private tokenService: ITokenService,
+    private uuidGenerator: IUuidGenerator,
   ) {}
 
   async execute(params: { refreshToken: string }) {
-    const payload = verifyRefreshToken(params.refreshToken);
+    const payload = this.tokenService.verifyRefreshToken(params.refreshToken);
     const savedRefreshToken = await this.refreshTokenRepository.findByUuid({
       uuid: payload.jti ?? '',
     });
@@ -20,7 +21,7 @@ export class RefreshToken {
       throw new Error('Unauthorized');
     }
 
-    const hashedToken = hashToken(params.refreshToken);
+    const hashedToken = this.tokenService.hashRefreshToken(params.refreshToken);
     if (hashedToken !== savedRefreshToken.hashedToken) {
       throw new Error('Unauthorized');
     }
@@ -37,9 +38,9 @@ export class RefreshToken {
       uuid: savedRefreshToken.uuid,
     });
 
-    const uuid = generateUUID();
-    const { accessToken, refreshToken } = generateTokens(user.id, uuid);
-    const newHashedToken = await hashToken(refreshToken);
+    const uuid = this.uuidGenerator.generate();
+    const { accessToken, refreshToken } = this.tokenService.generateTokens(user.id, uuid);
+    const newHashedToken = this.tokenService.hashRefreshToken(refreshToken);
 
     await this.refreshTokenRepository.create({
       uuid: uuid,

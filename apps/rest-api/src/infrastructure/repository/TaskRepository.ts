@@ -1,10 +1,12 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
 import { TaskModel } from '@/domain/models/TaskModel';
-import { db } from '@/infrastructure/database/db';
+import { PrismaClient } from '@prisma/client';
 
 export class TaskRepository implements ITaskRepository {
+  constructor(private db: PrismaClient) {}
+
   async findOne(params: { id: number; userId: number }): Promise<TaskModel | null> {
-    const item = await db.task.findFirst({
+    const item = await this.db.task.findFirst({
       where: { id: params.id, taskGroup: { userId: params.userId } },
     });
     if (!item) return null;
@@ -23,7 +25,7 @@ export class TaskRepository implements ITaskRepository {
   }
 
   async findMaxSort(params: { userId: number; taskGroupId: number }): Promise<number> {
-    const item = await db.task.findFirst({
+    const item = await this.db.task.findFirst({
       select: { sort: true },
       where: { taskGroupId: params.taskGroupId, taskGroup: { userId: params.userId } },
       orderBy: { sort: 'desc' },
@@ -37,7 +39,7 @@ export class TaskRepository implements ITaskRepository {
     const item = params.item;
 
     if (item.id) {
-      await db.task.update({
+      await this.db.task.update({
         where: { id: item.id },
         data: {
           title: item.title,
@@ -52,7 +54,7 @@ export class TaskRepository implements ITaskRepository {
     }
 
     // 新規
-    const res = await db.task.create({
+    const res = await this.db.task.create({
       data: {
         title: item.title,
         taskGroupId: item.taskGroupId,
@@ -77,7 +79,7 @@ export class TaskRepository implements ITaskRepository {
   }
 
   async delete(params: { item: TaskModel }): Promise<number> {
-    const item = await db.task.delete({
+    const item = await this.db.task.delete({
       where: {
         id: params.item.id,
       },
@@ -87,7 +89,7 @@ export class TaskRepository implements ITaskRepository {
   }
 
   async deleteDone(params: { userId: number; taskGroupId?: number }): Promise<number> {
-    const res = await db.task.deleteMany({
+    const res = await this.db.task.deleteMany({
       where: {
         done: true,
         taskGroup: { userId: params.userId },

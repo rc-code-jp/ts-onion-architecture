@@ -1,23 +1,29 @@
 import { TaskGroupController } from '@/interfaces/controllers/TaskGroupController';
+import { AppDeps } from '@/interfaces/deps';
 import { successResponse } from '@/interfaces/http/utils/responses';
 import { createFactory } from 'hono/factory';
 
-const factory = createFactory();
+const factory = createFactory<{
+  Variables: {
+    userId: number;
+  };
+}>();
 
 /**
  * タスクグループ一覧取得
  */
-export const getTaskGroupList = factory.createHandlers(async (c) => {
-  const userId = c.get('userId');
+export const createGetTaskGroupList = (deps: AppDeps) =>
+  factory.createHandlers(async (c) => {
+    const userId = c.get('userId');
 
-  const taskGroupController = new TaskGroupController();
-  const list = await taskGroupController.getTaskGroupList({
-    userId,
+    const taskGroupController = new TaskGroupController(deps);
+    const list = await taskGroupController.getTaskGroupList({
+      userId,
+    });
+
+    return successResponse(
+      JSON.stringify({
+        list: list,
+      }),
+    );
   });
-
-  return successResponse(
-    JSON.stringify({
-      list: list,
-    }),
-  );
-});

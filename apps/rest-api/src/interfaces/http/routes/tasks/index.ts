@@ -1,26 +1,28 @@
+import { AppDeps } from '@/interfaces/deps';
 import { Hono } from 'hono';
-import { isAuthenticated } from '../../middlewares/isAuthenticated';
-import { deleteDoneTasks } from './deleteDoneTasks';
-import { deleteTask } from './deleteTask';
-import { patchTask } from './patchTask';
-import { patchTaskDone } from './patchTaskDone';
-import { patchTaskSort } from './patchTaskSort';
-import { postTask } from './postTask';
+import { createIsAuthenticated } from '../../middlewares/isAuthenticated';
+import { createDeleteDoneTasks } from './deleteDoneTasks';
+import { createDeleteTask } from './deleteTask';
+import { createPatchTask } from './patchTask';
+import { createPatchTaskDone } from './patchTaskDone';
+import { createPatchTaskSort } from './patchTaskSort';
+import { createPostTask } from './postTask';
 
-const app = new Hono();
+export const createTasksRoute = (deps: AppDeps) => {
+  const app = new Hono<{
+    Variables: {
+      userId: number;
+    };
+  }>();
 
-app.use('*', isAuthenticated);
+  app.use('*', createIsAuthenticated(deps.tokenService));
 
-app.post('/', ...postTask);
+  app.post('/', ...createPostTask(deps));
+  app.patch('/:taskId', ...createPatchTask(deps));
+  app.patch('/:taskId/done', ...createPatchTaskDone(deps));
+  app.patch('/:taskId/sort', ...createPatchTaskSort(deps));
+  app.delete('/:taskId', ...createDeleteTask(deps));
+  app.delete('/done-tasks', ...createDeleteDoneTasks(deps));
 
-app.patch('/:taskId', ...patchTask);
-
-app.patch('/:taskId/done', ...patchTaskDone);
-
-app.patch('/:taskId/sort', ...patchTaskSort);
-
-app.delete('/:taskId', ...deleteTask);
-
-app.delete('/done-tasks', ...deleteDoneTasks);
-
-export const tasksRoute = app;
+  return app;
+};

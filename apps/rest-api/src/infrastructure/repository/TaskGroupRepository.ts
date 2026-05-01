@@ -1,11 +1,13 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
 import { TaskModel } from '@/domain/models/TaskModel';
-import { db } from '@/infrastructure/database/db';
+import { PrismaClient } from '@prisma/client';
 
 export class TaskGroupRepository implements ITaskGroupRepository {
+  constructor(private db: PrismaClient) {}
+
   async findAll(params: { userId: number }): Promise<TaskGroupModel[]> {
-    const list = await db.taskGroup.findMany({
+    const list = await this.db.taskGroup.findMany({
       select: {
         id: true,
         userId: true,
@@ -32,7 +34,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
   }
 
   async findOne(params: { id: number; userId: number }): Promise<TaskGroupModel | null> {
-    const item = await db.taskGroup.findFirst({
+    const item = await this.db.taskGroup.findFirst({
       where: {
         id: params.id,
         userId: params.userId,
@@ -41,7 +43,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
 
     if (!item) return null;
 
-    const tasks = await db.task.findMany({
+    const tasks = await this.db.task.findMany({
       where: {
         taskGroupId: item.id,
       },
@@ -74,7 +76,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
   }
 
   async findMaxSort(params: { userId: number }): Promise<number> {
-    const item = await db.taskGroup.findFirst({
+    const item = await this.db.taskGroup.findFirst({
       select: { sort: true },
       where: { userId: params.userId },
       orderBy: { sort: 'desc' },
@@ -89,7 +91,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
     const item = params.item;
 
     if (item.id) {
-      await db.taskGroup.update({
+      await this.db.taskGroup.update({
         where: { id: item.id },
         data: {
           name: item.name,
@@ -98,7 +100,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
       });
       return item;
     }
-    const res = await db.taskGroup.create({
+    const res = await this.db.taskGroup.create({
       data: {
         userId: item.userId,
         name: item.name,
@@ -115,13 +117,13 @@ export class TaskGroupRepository implements ITaskGroupRepository {
 
   async delete(params: { item: TaskGroupModel }): Promise<number> {
     // 外部キー制約のため、先にタスクを削除する
-    await db.task.deleteMany({
+    await this.db.task.deleteMany({
       where: {
         taskGroupId: params.item.id,
       },
     });
 
-    const item = await db.taskGroup.delete({
+    const item = await this.db.taskGroup.delete({
       where: {
         id: params.item.id,
       },

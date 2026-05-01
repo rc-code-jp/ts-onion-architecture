@@ -1,15 +1,18 @@
+import { AppDeps } from '@/interfaces/deps';
 import { Hono } from 'hono';
-import { getAuthMe } from './getAuthMe';
-import { postRefreshToken } from './postRefreshToken';
-import { postSignIn } from './postSignIn';
-import { postSignUp } from './postSignUp';
+import { createGetAuthMe } from './getAuthMe';
+import { createPostRefreshToken } from './postRefreshToken';
+import { createPostSignIn } from './postSignIn';
+import { createPostSignUp } from './postSignUp';
 
-const app = new Hono();
+export const createAuthRoute = (deps: AppDeps) => {
+  const app = new Hono();
 
-app.post('/signup', ...postSignUp);
-app.post('/signin', ...postSignIn);
-app.post('/refresh-token', ...postRefreshToken);
+  app.post('/signup', ...createPostSignUp(deps));
+  app.post('/signin', ...createPostSignIn(deps));
+  app.post('/refresh-token', ...createPostRefreshToken(deps));
 
-app.get('/me', ...getAuthMe);
+  app.get('/me', ...createGetAuthMe(deps));
 
-export const authRoute = app;
+  return app;
+};
