@@ -2,6 +2,7 @@ import { BcryptPasswordHasher } from '@/infrastructure/auth/BcryptPasswordHasher
 import { JwtTokenService } from '@/infrastructure/auth/JwtTokenService';
 import { UuidGenerator } from '@/infrastructure/auth/UuidGenerator';
 import { db } from '@/infrastructure/database/db';
+import { PrismaUnitOfWork } from '@/infrastructure/database/PrismaUnitOfWork';
 import { RefreshTokenRepository } from '@/infrastructure/repository/RefreshTokenRepository';
 import { TaskGroupRepository } from '@/infrastructure/repository/TaskGroupRepository';
 import { TaskRepository } from '@/infrastructure/repository/TaskRepository';
@@ -29,6 +30,7 @@ const deps: AppDeps = {
   passwordHasher: new BcryptPasswordHasher(),
   tokenService: new JwtTokenService({ accessSecret, refreshSecret }),
   uuidGenerator: new UuidGenerator(),
+  unitOfWork: new PrismaUnitOfWork(db),
 };
 
 const app = createApp(deps);

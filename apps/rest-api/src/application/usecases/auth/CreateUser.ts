@@ -1,47 +1,47 @@
-import { IRefreshTokenRepository } from '@/application/repositories/IRefreshTokenRepository';
-import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { IPasswordHasher } from '@/application/services/IPasswordHasher';
 import { ITokenService } from '@/application/services/ITokenService';
+import { IUnitOfWork } from '@/application/services/IUnitOfWork';
 import { IUuidGenerator } from '@/application/services/IUuidGenerator';
 import { AlreadyExistsError } from '@/domain/errors/AlreadyExistsError';
 
 export class CreateUser {
   constructor(
-    private repository: IUserRepository,
-    private refreshTokenRepository: IRefreshTokenRepository,
+    private unitOfWork: IUnitOfWork,
     private passwordHasher: IPasswordHasher,
     private tokenService: ITokenService,
     private uuidGenerator: IUuidGenerator,
   ) {}
 
   async execute(params: { email: string; password: string; name: string }) {
-    const existsUser = await this.repository.findByEmail({ email: params.email });
-
-    if (existsUser) {
-      throw new AlreadyExistsError('Email already exists');
-    }
-
+    // bcrypt はトランザクション外で実行（DB コネクションを長時間保持しないため）
     const hashedPassword = await this.passwordHasher.hash(params.password);
-
-    const user = await this.repository.create({
-      name: params.name,
-      email: params.email,
-      hashedPassword: hashedPassword,
-    });
-
     const uuid = this.uuidGenerator.generate();
-    const { accessToken, refreshToken } = this.tokenService.generateTokens(user.id, uuid);
-    const hashedToken = this.tokenService.hashRefreshToken(refreshToken);
 
-    await this.refreshTokenRepository.create({
-      uuid: uuid,
-      hashedToken: hashedToken,
-      userId: user.id,
+    return this.unitOfWork.transaction(async (repos) => {
+      const existsUser = await repos.userRepository.findByEmail({ email: params.email });
+      if (existsUser) {
+        throw new AlreadyExistsError('Email already exists');
+      }
+
+      const user = await repos.userRepository.create({
+        name: params.name,
+        email: params.email,
+        hashedPassword: hashedPassword,
+      });
+
+      const { accessToken, refreshToken } = this.tokenService.generateTokens(user.id, uuid);
+      const hashedToken = this.tokenService.hashRefreshToken(refreshToken);
+
+      await repos.refreshTokenRepository.create({
+        uuid: uuid,
+        hashedToken: hashedToken,
+        userId: user.id,
+      });
+
+      return {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      };
     });
-
-    return {
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    };
   }
 }

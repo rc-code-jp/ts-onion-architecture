@@ -1,9 +1,9 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
 import { TaskModel } from '@/domain/models/TaskModel';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class TaskRepository implements ITaskRepository {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: Prisma.TransactionClient) {}
 
   async findOne(params: { id: number; userId: number }): Promise<TaskModel | null> {
     const item = await this.db.task.findFirst({

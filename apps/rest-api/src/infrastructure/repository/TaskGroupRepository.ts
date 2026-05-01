@@ -1,10 +1,10 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
 import { TaskModel } from '@/domain/models/TaskModel';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class TaskGroupRepository implements ITaskGroupRepository {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: Prisma.TransactionClient) {}
 
   async findAll(params: { userId: number }): Promise<TaskGroupModel[]> {
     const list = await this.db.taskGroup.findMany({

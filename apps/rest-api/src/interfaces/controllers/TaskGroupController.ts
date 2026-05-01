@@ -63,7 +63,7 @@ export class TaskGroupController {
     id: number;
     userId: number;
   }) {
-    const usecase = new DeleteTaskGroup(this.deps.taskGroupRepository);
+    const usecase = new DeleteTaskGroup(this.deps.unitOfWork);
     const res = await usecase.execute({
       taskGroupId: params.id,
       userId: params.userId,

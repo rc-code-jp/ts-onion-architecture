@@ -1,9 +1,9 @@
 import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { UserModel } from '@/domain/models/UserModel';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class UserRepository implements IUserRepository {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: Prisma.TransactionClient) {}
 
   async findByEmail(params: { email: string }): Promise<UserModel | null> {
     const item = await this.db.user.findUnique({

@@ -2,18 +2,14 @@ import { IRefreshTokenRepository } from '@/application/repositories/IRefreshToke
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
 import { IUserRepository } from '@/application/repositories/IUserRepository';
-import { IPasswordHasher } from '@/application/services/IPasswordHasher';
-import { ITokenService } from '@/application/services/ITokenService';
-import { IUnitOfWork } from '@/application/services/IUnitOfWork';
-import { IUuidGenerator } from '@/application/services/IUuidGenerator';
 
-export interface AppDeps {
+export interface TransactionalRepositories {
   userRepository: IUserRepository;
   refreshTokenRepository: IRefreshTokenRepository;
   taskRepository: ITaskRepository;
   taskGroupRepository: ITaskGroupRepository;
-  passwordHasher: IPasswordHasher;
-  tokenService: ITokenService;
-  uuidGenerator: IUuidGenerator;
-  unitOfWork: IUnitOfWork;
+}
+
+export interface IUnitOfWork {
+  transaction<T>(work: (repos: TransactionalRepositories) => Promise<T>): Promise<T>;
 }

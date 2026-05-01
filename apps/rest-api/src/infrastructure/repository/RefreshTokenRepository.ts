@@ -1,9 +1,9 @@
 import { IRefreshTokenRepository } from '@/application/repositories/IRefreshTokenRepository';
 import { RefreshTokenModel } from '@/domain/models/RefreshTokenModel';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class RefreshTokenRepository implements IRefreshTokenRepository {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: Prisma.TransactionClient) {}
 
   async create(params: {
     uuid: string;

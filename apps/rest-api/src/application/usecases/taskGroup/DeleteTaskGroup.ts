@@ -1,17 +1,19 @@
-import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
+import { IUnitOfWork } from '@/application/services/IUnitOfWork';
 import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export class DeleteTaskGroup {
-  constructor(private repository: ITaskGroupRepository) {}
+  constructor(private unitOfWork: IUnitOfWork) {}
 
   async execute(params: { userId: number; taskGroupId: number }) {
-    const model = await this.repository.findOne({
-      id: params.taskGroupId,
-      userId: params.userId,
+    return this.unitOfWork.transaction(async (repos) => {
+      const model = await repos.taskGroupRepository.findOne({
+        id: params.taskGroupId,
+        userId: params.userId,
+      });
+      if (!model) {
+        throw new NotFoundError('TaskGroup not found');
+      }
+      return repos.taskGroupRepository.delete({ item: model });
     });
-    if (!model) {
-      throw new NotFoundError('TaskGroup not found');
-    }
-    return await this.repository.delete({ item: model });
   }
 }
