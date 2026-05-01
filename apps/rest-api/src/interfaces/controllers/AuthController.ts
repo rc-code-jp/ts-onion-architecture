@@ -14,8 +14,7 @@ export class AuthController {
     name: string;
   }) {
     const usecase = new CreateUser(
-      this.deps.userRepository,
-      this.deps.refreshTokenRepository,
+      this.deps.unitOfWork,
       this.deps.passwordHasher,
       this.deps.tokenService,
       this.deps.uuidGenerator,
