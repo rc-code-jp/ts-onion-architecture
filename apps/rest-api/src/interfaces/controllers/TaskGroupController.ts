@@ -13,7 +13,7 @@ export class TaskGroupController {
     id: number;
     userId: number;
   }) {
-    const usecase = new GetTaskGroup(this.deps.taskGroupRepository);
+    const usecase = new GetTaskGroup(this.deps.taskGroupRepository, this.deps.taskRepository);
     const item = await usecase.execute({
       id: params.id,
       userId: params.userId,

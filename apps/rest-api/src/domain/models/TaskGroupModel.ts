@@ -1,11 +1,9 @@
 import { BaseModel } from './BaseModel';
-import { TaskModel } from './TaskModel';
 
 export class TaskGroupModel extends BaseModel {
   readonly userId: number;
   readonly name: string;
   readonly sort: number;
-  readonly tasks?: TaskModel[];
 
   static readonly INITIAL_SORT_VALUE = 65535;
 
@@ -14,13 +12,11 @@ export class TaskGroupModel extends BaseModel {
     userId: number;
     name: string;
     sort: number;
-    tasks?: TaskModel[];
   }) {
     super({ id: props.id });
     this.userId = props.userId;
     this.name = props.name;
     this.sort = props.sort;
-    this.tasks = props.tasks;
   }
 
   static createNew(props: {
@@ -53,7 +49,6 @@ export class TaskGroupModel extends BaseModel {
       userId: this.userId,
       name: updates.name ?? this.name,
       sort: updates.sort ?? this.sort,
-      tasks: this.tasks,
     });
   }
 }
