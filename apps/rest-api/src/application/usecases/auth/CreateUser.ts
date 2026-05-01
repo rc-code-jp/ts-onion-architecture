@@ -3,6 +3,7 @@ import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { IPasswordHasher } from '@/application/services/IPasswordHasher';
 import { ITokenService } from '@/application/services/ITokenService';
 import { IUuidGenerator } from '@/application/services/IUuidGenerator';
+import { AlreadyExistsError } from '@/domain/errors/AlreadyExistsError';
 
 export class CreateUser {
   constructor(
@@ -17,7 +18,7 @@ export class CreateUser {
     const existsUser = await this.repository.findByEmail({ email: params.email });
 
     if (existsUser) {
-      throw new Error('Email already exists');
+      throw new AlreadyExistsError('Email already exists');
     }
 
     const hashedPassword = await this.passwordHasher.hash(params.password);

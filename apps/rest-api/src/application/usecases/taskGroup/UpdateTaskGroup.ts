@@ -1,4 +1,5 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export class UpdateTaskGroup {
   constructor(private repository: ITaskGroupRepository) {}
@@ -14,11 +15,14 @@ export class UpdateTaskGroup {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('TaskGroup not found');
+      throw new NotFoundError('TaskGroup not found');
     }
 
-    Object.assign(model, params);
+    const updated = model.withUpdates({
+      name: params.name,
+      sort: params.sort,
+    });
 
-    return await this.repository.save({ item: model });
+    return await this.repository.save({ item: updated });
   }
 }

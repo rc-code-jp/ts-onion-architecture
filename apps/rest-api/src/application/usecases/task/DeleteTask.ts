@@ -1,4 +1,5 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export class DeleteTask {
   constructor(private repository: ITaskRepository) {}
@@ -9,7 +10,7 @@ export class DeleteTask {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('Task not found');
+      throw new NotFoundError('Task not found');
     }
     return await this.repository.delete({ item: model });
   }

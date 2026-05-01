@@ -1,4 +1,5 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 import { TaskModel } from '@/domain/models/TaskModel';
 
 export class UpdateTaskSort {
@@ -15,37 +16,37 @@ export class UpdateTaskSort {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('Task not found');
+      throw new NotFoundError('Task not found');
     }
 
-    let prevModelSort = 0;
+    let prevSort: number | null = null;
     if (params.prevId) {
       const prevModel = await this.repository.findOne({
         id: params.prevId,
         userId: params.userId,
       });
       if (!prevModel) {
-        throw new Error('Task not found');
+        throw new NotFoundError('Task not found');
       }
-      prevModelSort = prevModel.sort;
+      prevSort = prevModel.sort;
     }
 
-    let nextModelSort = TaskModel.INITIAL_SORT_VALUE;
+    let nextSort: number | null = null;
     if (params.nextId) {
       const nextModel = await this.repository.findOne({
         id: params.nextId,
         userId: params.userId,
       });
       if (!nextModel) {
-        throw new Error('Task not found');
+        throw new NotFoundError('Task not found');
       }
-      nextModelSort = nextModel.sort;
+      nextSort = nextModel.sort;
     }
 
-    Object.assign(model, {
-      sort: (prevModelSort + nextModelSort) / 2,
+    const updated = model.withUpdates({
+      sort: TaskModel.sortBetween(prevSort, nextSort),
     });
 
-    return await this.repository.save({ item: model });
+    return await this.repository.save({ item: updated });
   }
 }

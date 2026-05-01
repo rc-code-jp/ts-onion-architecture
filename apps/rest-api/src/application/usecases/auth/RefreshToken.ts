@@ -2,6 +2,7 @@ import { IRefreshTokenRepository } from '@/application/repositories/IRefreshToke
 import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { ITokenService } from '@/application/services/ITokenService';
 import { IUuidGenerator } from '@/application/services/IUuidGenerator';
+import { UnauthorizedError } from '@/domain/errors/UnauthorizedError';
 
 export class RefreshToken {
   constructor(
@@ -18,12 +19,12 @@ export class RefreshToken {
     });
 
     if (!savedRefreshToken || savedRefreshToken.revoked) {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedError('Unauthorized');
     }
 
     const hashedToken = this.tokenService.hashRefreshToken(params.refreshToken);
     if (hashedToken !== savedRefreshToken.hashedToken) {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedError('Unauthorized');
     }
 
     const user = await this.repository.findById({
@@ -31,7 +32,7 @@ export class RefreshToken {
     });
 
     if (!user) {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedError('Unauthorized');
     }
 
     await this.refreshTokenRepository.delete({

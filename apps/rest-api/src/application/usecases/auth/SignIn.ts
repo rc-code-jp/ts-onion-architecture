@@ -3,6 +3,7 @@ import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { IPasswordHasher } from '@/application/services/IPasswordHasher';
 import { ITokenService } from '@/application/services/ITokenService';
 import { IUuidGenerator } from '@/application/services/IUuidGenerator';
+import { InvalidCredentialError } from '@/domain/errors/InvalidCredentialError';
 
 export class SignIn {
   constructor(
@@ -16,7 +17,7 @@ export class SignIn {
   async execute(params: { email: string; password: string }) {
     const existsUser = await this.repository.findByEmail({ email: params.email });
     if (!existsUser) {
-      throw new Error('Email not found');
+      throw new InvalidCredentialError('Invalid email or password');
     }
 
     const validPassword = await this.passwordHasher.compare(
@@ -24,7 +25,7 @@ export class SignIn {
       existsUser.hashedPassword,
     );
     if (!validPassword) {
-      throw new Error('Password is invalid');
+      throw new InvalidCredentialError('Invalid email or password');
     }
 
     const uuid = this.uuidGenerator.generate();
