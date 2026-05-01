@@ -4,20 +4,26 @@ import { TaskModel } from '@/domain/models/TaskModel';
 export class CreateTask {
   constructor(private repository: ITaskRepository) {}
 
-  async execute(params: Omit<TaskModel, 'id' | 'done' | 'sort'> & { userId: number }) {
+  async execute(params: {
+    userId: number;
+    taskGroupId: number;
+    title: string;
+    description?: string;
+    dueDate?: string;
+    dueTime?: string;
+  }) {
     const maxSort = await this.repository.findMaxSort({
       taskGroupId: params.taskGroupId,
       userId: params.userId,
     });
 
-    const model = new TaskModel({
-      id: 0,
+    const model = TaskModel.createNew({
       taskGroupId: params.taskGroupId,
       title: params.title,
+      description: params.description,
       dueDate: params.dueDate,
       dueTime: params.dueTime,
-      description: params.description,
-      sort: Math.floor(maxSort) + TaskModel.INITIAL_SORT_VALUE,
+      maxSort,
     });
     return await this.repository.save({ item: model });
   }

@@ -4,16 +4,13 @@ import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
 export class CreateTaskGroup {
   constructor(private repository: ITaskGroupRepository) {}
 
-  private INITIAL_SORT_VALUE = 65535;
-
-  async execute(params: Omit<TaskGroupModel, 'id' | 'sort'>) {
+  async execute(params: { userId: number; name: string }) {
     const maxSort = await this.repository.findMaxSort({ userId: params.userId });
 
-    const model = new TaskGroupModel({
-      id: 0,
-      name: params.name,
+    const model = TaskGroupModel.createNew({
       userId: params.userId,
-      sort: Math.floor(maxSort) + this.INITIAL_SORT_VALUE,
+      name: params.name,
+      maxSort,
     });
     return await this.repository.save({ item: model });
   }

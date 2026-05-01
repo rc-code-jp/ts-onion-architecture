@@ -1,4 +1,5 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
 
 export class UpdateTaskGroupSort {
@@ -15,37 +16,37 @@ export class UpdateTaskGroupSort {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('Task Group not found');
+      throw new NotFoundError('TaskGroup not found');
     }
 
-    let prevModelSort = 0;
+    let prevSort: number | null = null;
     if (params.prevId) {
       const prevModel = await this.repository.findOne({
         id: params.prevId,
         userId: params.userId,
       });
       if (!prevModel) {
-        throw new Error('Task Group not found');
+        throw new NotFoundError('TaskGroup not found');
       }
-      prevModelSort = prevModel.sort;
+      prevSort = prevModel.sort;
     }
 
-    let nextModelSort = TaskGroupModel.INITIAL_SORT_VALUE;
+    let nextSort: number | null = null;
     if (params.nextId) {
       const nextModel = await this.repository.findOne({
         id: params.nextId,
         userId: params.userId,
       });
       if (!nextModel) {
-        throw new Error('Task Group not found');
+        throw new NotFoundError('TaskGroup not found');
       }
-      nextModelSort = nextModel.sort;
+      nextSort = nextModel.sort;
     }
 
-    Object.assign(model, {
-      sort: (prevModelSort + nextModelSort) / 2,
+    const updated = model.withUpdates({
+      sort: TaskGroupModel.sortBetween(prevSort, nextSort),
     });
 
-    return await this.repository.save({ item: model });
+    return await this.repository.save({ item: updated });
   }
 }

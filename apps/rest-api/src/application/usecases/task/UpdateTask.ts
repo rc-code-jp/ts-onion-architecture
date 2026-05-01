@@ -1,4 +1,5 @@
 import { ITaskRepository } from '@/application/repositories/ITaskRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export class UpdateTask {
   constructor(private repository: ITaskRepository) {}
@@ -18,11 +19,18 @@ export class UpdateTask {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('Task not found');
+      throw new NotFoundError('Task not found');
     }
 
-    Object.assign(model, params);
+    const updated = model.withUpdates({
+      title: params.title,
+      description: params.description,
+      dueDate: params.dueDate,
+      dueTime: params.dueTime,
+      done: params.done,
+      sort: params.sort,
+    });
 
-    return await this.repository.save({ item: model });
+    return await this.repository.save({ item: updated });
   }
 }

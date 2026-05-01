@@ -1,4 +1,5 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export class DeleteTaskGroup {
   constructor(private repository: ITaskGroupRepository) {}
@@ -9,7 +10,7 @@ export class DeleteTaskGroup {
       userId: params.userId,
     });
     if (!model) {
-      throw new Error('TaskGroup not found');
+      throw new NotFoundError('TaskGroup not found');
     }
     return await this.repository.delete({ item: model });
   }

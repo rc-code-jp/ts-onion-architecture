@@ -41,6 +41,20 @@ export const notFoundResponse = (message = 'Not Found') => {
 };
 
 /**
+ * Create a 409 response object
+ * @param message string
+ * @returns Response
+ */
+export const conflictResponse = (message = 'Conflict') => {
+  return new Response(JSON.stringify([message]), {
+    status: 409,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+/**
  * Create a 422 response object
  * @param messages string[]
  * @returns Response
