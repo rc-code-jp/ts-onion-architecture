@@ -6,4 +6,5 @@ export interface ITaskRepository {
   save(params: { item: TaskModel }): Promise<TaskModel>;
   delete(params: { item: TaskModel }): Promise<number>;
   deleteDone(params: { userId: number; taskGroupId?: number }): Promise<number>;
+  deleteByTaskGroupId(params: { taskGroupId: number }): Promise<number>;
 }
