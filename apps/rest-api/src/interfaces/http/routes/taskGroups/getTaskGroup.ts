@@ -29,7 +29,7 @@ export const createGetTaskGroup = (deps: AppDeps) =>
 
     return successResponse(
       JSON.stringify({
-        item: res,
+        item: { ...res.taskGroup, tasks: res.tasks },
       }),
     );
   });

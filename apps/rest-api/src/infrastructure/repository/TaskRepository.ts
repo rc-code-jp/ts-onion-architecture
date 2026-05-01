@@ -24,6 +24,26 @@ export class TaskRepository implements ITaskRepository {
     return model;
   }
 
+  async findAllByTaskGroupId(params: { taskGroupId: number }): Promise<TaskModel[]> {
+    const list = await this.db.task.findMany({
+      where: { taskGroupId: params.taskGroupId },
+      orderBy: { sort: 'asc' },
+    });
+    return list.map(
+      (item) =>
+        new TaskModel({
+          id: item.id,
+          taskGroupId: item.taskGroupId,
+          title: item.title,
+          description: item.description ?? undefined,
+          dueDate: item.dueDate ?? undefined,
+          dueTime: item.dueTime ?? undefined,
+          done: item.done,
+          sort: item.sort,
+        }),
+    );
+  }
+
   async findMaxSort(params: { userId: number; taskGroupId: number }): Promise<number> {
     const item = await this.db.task.findFirst({
       select: { sort: true },

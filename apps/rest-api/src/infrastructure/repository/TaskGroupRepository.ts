@@ -1,6 +1,5 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
-import { TaskModel } from '@/domain/models/TaskModel';
 import { Prisma } from '@prisma/client';
 
 export class TaskGroupRepository implements ITaskGroupRepository {
@@ -43,36 +42,12 @@ export class TaskGroupRepository implements ITaskGroupRepository {
 
     if (!item) return null;
 
-    const tasks = await this.db.task.findMany({
-      where: {
-        taskGroupId: item.id,
-      },
-      orderBy: {
-        sort: 'asc',
-      },
-    });
-
-    const model = new TaskGroupModel({
+    return new TaskGroupModel({
       id: item.id,
       userId: item.userId,
       name: item.name,
       sort: item.sort,
-      tasks: tasks.map(
-        (task) =>
-          new TaskModel({
-            id: task.id,
-            taskGroupId: task.taskGroupId,
-            title: task.title,
-            description: task.description ?? undefined,
-            dueDate: task.dueDate ?? undefined,
-            dueTime: task.dueTime ?? undefined,
-            done: task.done,
-            sort: task.sort,
-          }),
-      ),
     });
-
-    return model;
   }
 
   async findMaxSort(params: { userId: number }): Promise<number> {
