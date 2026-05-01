@@ -1,17 +1,16 @@
+import { Sort } from '@/domain/values/Sort';
 import { BaseModel } from './BaseModel';
 
 export class TaskGroupModel extends BaseModel {
   readonly userId: number;
   readonly name: string;
-  readonly sort: number;
-
-  static readonly INITIAL_SORT_VALUE = 65535;
+  readonly sort: Sort;
 
   constructor(props: {
     id: number;
     userId: number;
     name: string;
-    sort: number;
+    sort: Sort;
   }) {
     super({ id: props.id });
     this.userId = props.userId;
@@ -22,33 +21,32 @@ export class TaskGroupModel extends BaseModel {
   static createNew(props: {
     userId: number;
     name: string;
-    maxSort: number;
+    afterMaxSort: number;
   }): TaskGroupModel {
     return new TaskGroupModel({
       id: 0,
       userId: props.userId,
       name: props.name,
-      sort: Math.floor(props.maxSort) + TaskGroupModel.INITIAL_SORT_VALUE,
+      sort: Sort.appendAfter(props.afterMaxSort),
     });
   }
 
-  static sortBetween(prev: number | null, next: number | null): number {
-    const prevSort = prev ?? 0;
-    const nextSort = next ?? TaskGroupModel.INITIAL_SORT_VALUE;
-    return (prevSort + nextSort) / 2;
-  }
-
-  withUpdates(
-    updates: Partial<{
-      name: string;
-      sort: number;
-    }>,
-  ): TaskGroupModel {
+  rename(name: string): TaskGroupModel {
+    if (this.name === name) return this;
     return new TaskGroupModel({
       id: this.id,
       userId: this.userId,
-      name: updates.name ?? this.name,
-      sort: updates.sort ?? this.sort,
+      name,
+      sort: this.sort,
+    });
+  }
+
+  reorderBetween(prev: Sort | null, next: Sort | null): TaskGroupModel {
+    return new TaskGroupModel({
+      id: this.id,
+      userId: this.userId,
+      name: this.name,
+      sort: Sort.between(prev, next),
     });
   }
 }

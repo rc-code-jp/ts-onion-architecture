@@ -1,5 +1,6 @@
 import { ITaskGroupRepository } from '@/application/repositories/ITaskGroupRepository';
 import { TaskGroupModel } from '@/domain/models/TaskGroupModel';
+import { Sort } from '@/domain/values/Sort';
 import { Prisma } from '@prisma/client';
 
 export class TaskGroupRepository implements ITaskGroupRepository {
@@ -26,7 +27,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
           id: item.id,
           userId: item.userId,
           name: item.name,
-          sort: item.sort,
+          sort: Sort.of(item.sort),
         }),
     );
     return models;
@@ -46,7 +47,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
       id: item.id,
       userId: item.userId,
       name: item.name,
-      sort: item.sort,
+      sort: Sort.of(item.sort),
     });
   }
 
@@ -70,7 +71,7 @@ export class TaskGroupRepository implements ITaskGroupRepository {
         where: { id: item.id },
         data: {
           name: item.name,
-          sort: item.sort,
+          sort: item.sort.value,
         },
       });
       return item;
@@ -79,14 +80,14 @@ export class TaskGroupRepository implements ITaskGroupRepository {
       data: {
         userId: item.userId,
         name: item.name,
-        sort: item.sort,
+        sort: item.sort.value,
       },
     });
     return new TaskGroupModel({
       id: res.id,
       userId: res.userId,
       name: res.name,
-      sort: res.sort,
+      sort: Sort.of(res.sort),
     });
   }
 
