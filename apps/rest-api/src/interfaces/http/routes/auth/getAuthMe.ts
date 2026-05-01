@@ -1,24 +1,30 @@
 import { AuthController } from '@/interfaces/controllers/AuthController';
+import { AppDeps } from '@/interfaces/deps';
 import { successResponse } from '@/interfaces/http/utils/responses';
 import { createFactory } from 'hono/factory';
-import { isAuthenticated } from '../../middlewares/isAuthenticated';
+import { createIsAuthenticated } from '../../middlewares/isAuthenticated';
 
-const factory = createFactory();
+const factory = createFactory<{
+  Variables: {
+    userId: number;
+  };
+}>();
 
 /**
- * サインアップ
+ * 認証中ユーザー情報取得
  */
-export const getAuthMe = factory.createHandlers(isAuthenticated, async (c) => {
-  const userId = c.get('userId');
+export const createGetAuthMe = (deps: AppDeps) =>
+  factory.createHandlers(createIsAuthenticated(deps.tokenService), async (c) => {
+    const userId = c.get('userId');
 
-  const authController = new AuthController();
-  const res = await authController.getAuthMe({
-    userId: userId,
+    const authController = new AuthController(deps);
+    const res = await authController.getAuthMe({
+      userId: userId,
+    });
+
+    return successResponse(
+      JSON.stringify({
+        user: res.item,
+      }),
+    );
   });
-
-  return successResponse(
-    JSON.stringify({
-      user: res.item,
-    }),
-  );
-});

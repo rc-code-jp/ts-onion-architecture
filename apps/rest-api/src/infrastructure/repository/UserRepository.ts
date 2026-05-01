@@ -1,10 +1,12 @@
 import { IUserRepository } from '@/application/repositories/IUserRepository';
 import { UserModel } from '@/domain/models/UserModel';
-import { db } from '@/infrastructure/database/db';
+import { PrismaClient } from '@prisma/client';
 
 export class UserRepository implements IUserRepository {
+  constructor(private db: PrismaClient) {}
+
   async findByEmail(params: { email: string }): Promise<UserModel | null> {
-    const item = await db.user.findUnique({
+    const item = await this.db.user.findUnique({
       where: { email: params.email },
     });
     if (!item) return null;
@@ -19,7 +21,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async findById(params: { id: number }): Promise<UserModel | null> {
-    const item = await db.user.findUnique({
+    const item = await this.db.user.findUnique({
       where: { id: params.id },
     });
     if (!item) return null;
@@ -38,7 +40,7 @@ export class UserRepository implements IUserRepository {
     hashedPassword: string;
     name: string;
   }): Promise<UserModel> {
-    const item = await db.user.create({
+    const item = await this.db.user.create({
       data: {
         email: params.email,
         name: params.name,

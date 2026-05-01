@@ -1,14 +1,16 @@
 import { IRefreshTokenRepository } from '@/application/repositories/IRefreshTokenRepository';
 import { IUserRepository } from '@/application/repositories/IUserRepository';
-import { generateTokens } from '@/utils/auth/jtw';
-import { comparePassword } from '@/utils/auth/password';
-import { hashToken } from '@/utils/auth/token';
-import { generateUUID } from '@/utils/auth/uuid';
+import { IPasswordHasher } from '@/application/services/IPasswordHasher';
+import { ITokenService } from '@/application/services/ITokenService';
+import { IUuidGenerator } from '@/application/services/IUuidGenerator';
 
 export class SignIn {
   constructor(
     private repository: IUserRepository,
     private refreshTokenRepository: IRefreshTokenRepository,
+    private passwordHasher: IPasswordHasher,
+    private tokenService: ITokenService,
+    private uuidGenerator: IUuidGenerator,
   ) {}
 
   async execute(params: { email: string; password: string }) {
@@ -17,14 +19,17 @@ export class SignIn {
       throw new Error('Email not found');
     }
 
-    const validPassword = await comparePassword(params.password, existsUser.hashedPassword);
+    const validPassword = await this.passwordHasher.compare(
+      params.password,
+      existsUser.hashedPassword,
+    );
     if (!validPassword) {
       throw new Error('Password is invalid');
     }
 
-    const uuid = await generateUUID();
-    const { accessToken, refreshToken } = generateTokens(existsUser.id, uuid);
-    const hashedToken = await hashToken(refreshToken);
+    const uuid = this.uuidGenerator.generate();
+    const { accessToken, refreshToken } = this.tokenService.generateTokens(existsUser.id, uuid);
+    const hashedToken = this.tokenService.hashRefreshToken(refreshToken);
 
     await this.refreshTokenRepository.create({
       uuid: uuid,
