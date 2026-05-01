@@ -1,5 +1,5 @@
 {
-  "name": "@ts-layered-architecture/nuxt",
+  "name": "@ts-onion-architecture/nuxt",
   "private": true,
   "type": "module",
   "scripts": {

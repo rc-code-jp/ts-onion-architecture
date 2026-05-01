@@ -1,5 +1,5 @@
 {
-  "name": "ts-layered-architecture",
+  "name": "ts-onion-architecture",
   "private": true,
   "version": "1.0.0",
   "engines": {
@@ -18,8 +18,8 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "@rest": "pnpm -F @ts-layered-architecture/rest-api",
-    "@nuxt": "pnpm -F @ts-layered-architecture/nuxt",
+    "@rest": "pnpm -F @ts-onion-architecture/rest-api",
+    "@nuxt": "pnpm -F @ts-onion-architecture/nuxt",
     "dev": "turbo dev",
     "build": "turbo build",
     "format": "turbo format",
