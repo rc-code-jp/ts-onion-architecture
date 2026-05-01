@@ -47,7 +47,6 @@ export class TaskController {
       dueDate: params.dueDate,
       dueTime: params.dueTime,
       done: params.done,
-      sort: 0,
     });
 
     return item.id;
