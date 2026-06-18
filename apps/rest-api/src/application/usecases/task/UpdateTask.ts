@@ -12,7 +12,6 @@ export class UpdateTask {
     dueDate?: string;
     dueTime?: string;
     done?: boolean;
-    sort?: number;
   }) {
     const model = await this.repository.findOne({
       id: params.taskId,
@@ -22,14 +21,15 @@ export class UpdateTask {
       throw new NotFoundError('Task not found');
     }
 
-    const updated = model.withUpdates({
+    let updated = model.changeContent({
       title: params.title,
       description: params.description,
       dueDate: params.dueDate,
       dueTime: params.dueTime,
-      done: params.done,
-      sort: params.sort,
     });
+    if (params.done !== undefined) {
+      updated = updated.markDone(params.done);
+    }
 
     return await this.repository.save({ item: updated });
   }

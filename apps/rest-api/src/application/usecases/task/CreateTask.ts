@@ -23,7 +23,7 @@ export class CreateTask {
       description: params.description,
       dueDate: params.dueDate,
       dueTime: params.dueTime,
-      maxSort,
+      afterMaxSort: maxSort,
     });
     return await this.repository.save({ item: model });
   }

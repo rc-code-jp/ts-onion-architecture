@@ -10,7 +10,7 @@ export class CreateTaskGroup {
     const model = TaskGroupModel.createNew({
       userId: params.userId,
       name: params.name,
-      maxSort,
+      afterMaxSort: maxSort,
     });
     return await this.repository.save({ item: model });
   }

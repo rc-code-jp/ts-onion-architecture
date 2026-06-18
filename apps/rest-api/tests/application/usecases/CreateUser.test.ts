@@ -41,6 +41,7 @@ describe('usecase', () => {
 
     taskRepositoryMock = {
       findOne: vi.fn(),
+      findAllByTaskGroupId: vi.fn(),
       findMaxSort: vi.fn(),
       save: vi.fn(),
       delete: vi.fn(),
